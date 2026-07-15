@@ -53,7 +53,7 @@ if (logoutBtn) {
 
     localStorage.removeItem("cart");
 
-    window.location.href = "login.html";
+    window.location.href = "index.html";
   });
 }
 
