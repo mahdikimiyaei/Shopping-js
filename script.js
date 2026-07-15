@@ -125,24 +125,34 @@ document.querySelector("#loginError").innerText =
 
 
 
-
 // ===============================
 // CHECK LOGIN
 // ===============================
 
+const savedUser =
+localStorage.getItem("currentUser");
 
 
 if(window.location.pathname.includes("shop.html")){
 
 
-const user =
-JSON.parse(
-localStorage.getItem("currentUser")
+if(!savedUser){
+
+
+window.location.replace(
+"index.html"
 );
 
 
+}
 
-if(!user || !user.login){
+
+const user =
+JSON.parse(savedUser);
+
+
+
+if(!user || user.login !== true){
 
 
 window.location.replace(
@@ -171,7 +181,7 @@ window.location.replace(
 
 let currentUser =
 JSON.parse(
-localStorage.getItem("currentUser")
+localStorage.getItem("currentUser") || "null"
 );
 
 
