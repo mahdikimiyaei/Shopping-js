@@ -1,0 +1,238 @@
+```html
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern Shop</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<header>
+
+    <h2>
+        <i class="fa-solid fa-store"></i>
+        Modern Shop
+    </h2>
+
+    <button id="logoutBtn">
+        <i class="fa-solid fa-right-from-bracket"></i>
+        خروج
+    </button>
+
+</header>
+
+<section class="products">
+
+    <div class="card">
+
+        <img src="https://picsum.photos/300/220?1">
+
+        <h3>MacBook Pro</h3>
+
+        <p>95,000,000 تومان</p>
+
+        <button class="add-cart"
+            data-name="MacBook Pro"
+            data-price="95000000">
+
+            افزودن به سبد خرید
+
+        </button>
+
+    </div>
+
+    <div class="card">
+
+        <img src="https://picsum.photos/300/220?2">
+
+        <h3>iPhone 16</h3>
+
+        <p>68,000,000 تومان</p>
+
+        <button class="add-cart"
+            data-name="iPhone 16"
+            data-price="68000000">
+
+            افزودن به سبد خرید
+
+        </button>
+
+    </div>
+
+    <div class="card">
+
+        <img src="https://picsum.photos/300/220?3">
+
+        <h3>Apple Watch</h3>
+
+        <p>23,000,000 تومان</p>
+
+        <button class="add-cart"
+            data-name="Apple Watch"
+            data-price="23000000">
+
+            افزودن به سبد خرید
+
+        </button>
+
+    </div>
+
+    <div class="card">
+
+        <img src="https://picsum.photos/300/220?4">
+
+        <h3>AirPods Pro</h3>
+
+        <p>12,500,000 تومان</p>
+
+        <button class="add-cart"
+            data-name="AirPods Pro"
+            data-price="12500000">
+
+            افزودن به سبد خرید
+
+        </button>
+
+    </div>
+
+    <div class="card">
+
+        <img src="https://picsum.photos/300/220?5">
+
+        <h3>PlayStation 5</h3>
+
+        <p>39,000,000 تومان</p>
+
+        <button class="add-cart"
+            data-name="PlayStation 5"
+            data-price="39000000">
+
+            افزودن به سبد خرید
+
+        </button>
+
+    </div>
+
+    <div class="card">
+
+        <img src="https://picsum.photos/300/220?6">
+
+        <h3>Gaming Keyboard</h3>
+
+        <p>4,800,000 تومان</p>
+
+        <button class="add-cart"
+            data-name="Gaming Keyboard"
+            data-price="4800000">
+
+            افزودن به سبد خرید
+
+        </button>
+
+    </div>
+
+</section>
+
+<section class="cart-section">
+
+    <h2>
+        سبد خرید
+    </h2>
+
+    <div id="cartItems">
+
+    </div>
+
+    <h3>
+
+        مجموع:
+
+        <span id="totalPrice">
+            0
+        </span>
+
+        تومان
+
+    </h3>
+
+</section>
+
+<section class="checkout">
+
+    <h2>
+
+        اطلاعات سفارش
+
+    </h2>
+
+    <form id="checkoutForm">
+
+        <input
+            type="text"
+            id="fullname"
+            placeholder="نام و نام خانوادگی"
+            required>
+
+        <input
+            type="email"
+            id="email"
+            placeholder="ایمیل"
+            required>
+
+        <textarea
+            id="address"
+            placeholder="آدرس"
+            required></textarea>
+
+        <input
+            type="text"
+            id="postal"
+            placeholder="کد پستی"
+            maxlength="10"
+            required>
+
+        <button>
+
+            ثبت سفارش
+
+        </button>
+
+    </form>
+
+</section>
+
+<section class="result">
+
+    <h2>
+
+        خلاصه سفارش
+
+    </h2>
+
+    <div id="orderResult">
+
+        هنوز سفارشی ثبت نشده است.
+
+    </div>
+
+</section>
+
+<script src="script.js"></script>
+
+</body>
+
+</html>
