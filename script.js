@@ -119,9 +119,40 @@ document.querySelector("#loginError").innerText =
 
 }
 
+// ===============================
+// REDIRECT IF ALREADY LOGIN
+// ===============================
+
+if(window.location.pathname.includes("index.html") || window.location.pathname === "/"){
+
+
+const savedUser =
+localStorage.getItem("currentUser");
+
+
+if(savedUser){
+
+
+const user =
+JSON.parse(savedUser);
 
 
 
+if(user && user.login === true){
+
+
+window.location.replace(
+"shop.html"
+);
+
+
+}
+
+
+}
+
+
+}
 
 
 
