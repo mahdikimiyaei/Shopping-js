@@ -62,8 +62,6 @@ Modern Shop
 
 
 
-
-
 <div class="card">
 
 <img src="https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=600">
@@ -114,7 +112,6 @@ data-price="68000000">
 
 
 
-
 <div class="card">
 
 <img src="https://images.unsplash.com/photo-1544117519-31a4b719223d?w=600">
@@ -135,7 +132,6 @@ data-price="23000000">
 
 
 </div>
-
 
 
 
@@ -168,8 +164,6 @@ data-price="12500000">
 
 
 
-
-
 <div class="card">
 
 <img src="https://images.unsplash.com/photo-1606813907291-d86efa9b94db?w=600">
@@ -196,8 +190,6 @@ data-price="39000000">
 
 
 
-
-
 <div class="card">
 
 <img src="https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=600">
@@ -218,14 +210,6 @@ data-price="4800000">
 
 
 </div>
-
-
-
-
-
-
-
-
 <div class="card">
 
 <img src="https://images.unsplash.com/photo-1610945415295-d9bbf067e59c?w=600">
@@ -390,31 +374,37 @@ data-price="45000000">
 
 
 
+
 </section>
+
+
+
+
 
 <section class="cart-section">
 
-    <h2>
-        سبد خرید
-    </h2>
+<h2>
+سبد خرید
+</h2>
 
 
-    <div id="cartItems">
+<div id="cartItems">
 
-    </div>
+</div>
 
 
-    <h3>
 
-        مجموع:
+<h3>
 
-        <span id="totalPrice">
-            0
-        </span>
+مجموع:
 
-        تومان
+<span id="totalPrice">
+0
+</span>
 
-    </h3>
+تومان
+
+</h3>
 
 
 </section>
@@ -426,62 +416,81 @@ data-price="45000000">
 <section class="checkout">
 
 
-    <h2>
-        اطلاعات سفارش
-    </h2>
+<h2>
+اطلاعات سفارش
+</h2>
 
 
 
-    <form id="checkoutForm">
+<form id="checkoutForm">
 
 
 
-        <input
-        type="text"
-        id="fullname"
-        placeholder="نام و نام خانوادگی"
-        required>
-
-
-
-
-        <input
-        type="email"
-        id="email"
-        placeholder="ایمیل"
-        required>
+<input
+type="text"
+id="fullname"
+placeholder="نام و نام خانوادگی"
+required>
 
 
 
 
-        <textarea
-        id="address"
-        placeholder="آدرس"
-        required></textarea>
+<input
+type="email"
+id="email"
+placeholder="ایمیل"
+required>
+
+
+
+
+<textarea
+id="address"
+placeholder="آدرس"
+required></textarea>
 
 
 
 
 
-        <input
-        type="text"
-        id="postal"
-        placeholder="کد پستی"
-        maxlength="10"
-        required>
+<input
+type="text"
+id="postal"
+placeholder="کد پستی"
+maxlength="10"
+required>
 
 
 
 
-        <button>
 
-            ثبت سفارش
+<!-- زمان ارسال ساخته شده توسط جاوااسکریپت -->
 
-        </button>
+<select
+id="deliveryTime"
+required>
+
+<option value="">
+
+انتخاب زمان ارسال
+
+</option>
+
+</select>
 
 
 
-    </form>
+
+
+<button>
+
+ثبت سفارش
+
+</button>
+
+
+
+</form>
 
 
 </section>
@@ -490,28 +499,26 @@ data-price="45000000">
 
 
 
-
-
 <section class="result">
 
 
-    <h2>
+<h2>
 
-        خلاصه سفارش
+خلاصه سفارش
 
-    </h2>
-
-
-
-
-    <div id="orderResult">
-
-
-        هنوز سفارشی ثبت نشده است.
+</h2>
 
 
 
-    </div>
+
+<div id="orderResult">
+
+
+هنوز سفارشی ثبت نشده است.
+
+
+
+</div>
 
 
 
