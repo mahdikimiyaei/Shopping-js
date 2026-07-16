@@ -155,16 +155,28 @@ window.location.replace(
 }
 
 
+// ===============================
+// CHECK LOGIN ALL PRIVATE PAGES
+// ===============================
 
-// ===============================
-// CHECK LOGIN
-// ===============================
 
 const savedUser =
 localStorage.getItem("currentUser");
 
 
-if(window.location.pathname.includes("shop.html")){
+const privatePages = [
+"shop.html",
+"details.html"
+];
+
+
+
+const currentPage =
+window.location.pathname.split("/").pop();
+
+
+
+if(privatePages.includes(currentPage)){
 
 
 if(!savedUser){
@@ -176,6 +188,7 @@ window.location.replace(
 
 
 }
+
 
 
 const user =
@@ -195,12 +208,6 @@ window.location.replace(
 
 
 }
-
-
-
-
-
-
 
 
 
@@ -1095,9 +1102,261 @@ ${order.deliveryTime}
 }
 
 
+// ===============================
+// PRODUCT DETAILS
+// ===============================
+
+
+const detailsButtons = document.querySelectorAll(".details-btn");
+
+
+detailsButtons.forEach(button => {
+
+
+button.addEventListener("click",()=>{
+
+
+const product = {
+
+
+name: button.dataset.name,
+
+
+price: Number(button.dataset.price),
+
+
+image: button.dataset.image,
+
+
+description: button.dataset.description,
+
+
+specs: JSON.parse(button.dataset.specs)
 
 
 
+};
+
+
+
+localStorage.setItem(
+
+"selectedProduct",
+
+JSON.stringify(product)
+
+);
+
+
+
+window.location.href="details.html";
+
+
+});
+
+
+});
+
+
+// ===============================
+// SHOW DETAILS PAGE
+// ===============================
+
+
+const selectedProduct = JSON.parse(
+
+localStorage.getItem("selectedProduct")
+
+);
+
+
+
+const detailsImage =
+document.querySelector("#detailsImage");
+
+
+const detailsName =
+document.querySelector("#detailsName");
+
+
+const detailsPrice =
+document.querySelector("#detailsPrice");
+
+
+const detailsDescription =
+document.querySelector("#detailsDescription");
+
+
+const detailsSpecs =
+document.querySelector("#detailsSpecs");
+
+
+
+
+
+if(selectedProduct && detailsImage){
+
+
+
+detailsImage.src =
+selectedProduct.image;
+
+
+
+detailsName.innerText =
+selectedProduct.name;
+
+
+
+detailsPrice.innerText =
+selectedProduct.price.toLocaleString()
++
+" تومان";
+
+
+
+detailsDescription.innerText =
+selectedProduct.description;
+
+
+
+
+
+if(detailsSpecs && selectedProduct.specs){
+
+
+
+detailsSpecs.innerHTML = "";
+
+
+
+Object.entries(selectedProduct.specs).forEach(([key,value])=>{
+
+
+
+detailsSpecs.innerHTML += `
+
+
+<tr>
+
+<td>
+${key}
+</td>
+
+
+<td>
+${value}
+</td>
+
+
+</tr>
+
+
+`;
+
+
+
+});
+
+
+
+}
+
+
+
+}
+
+// ===============================
+// BACK TO SHOP
+// ===============================
+
+
+const backShop =
+document.querySelector("#backShop");
+
+
+if(backShop){
+
+
+backShop.addEventListener("click",()=>{
+
+
+window.location.href="shop.html";
+
+
+});
+
+
+}
+
+
+
+// ===============================
+// DETAILS ADD CART
+// ===============================
+
+
+const detailsAddCart =
+
+document.querySelector("#detailsAddCart");
+
+
+
+if(detailsAddCart){
+
+
+
+detailsAddCart.addEventListener("click",()=>{
+
+
+
+if(!selectedProduct)
+return;
+
+
+
+const product = {
+
+
+id:Date.now(),
+
+
+name:selectedProduct.name,
+
+
+price:selectedProduct.price
+
+
+
+};
+
+
+
+cart.push(product);
+
+
+
+saveUserData();
+
+
+
+renderCart();
+
+
+
+showMessage(
+
+"محصول به سبد خرید اضافه شد"
+
+);
+
+
+
+});
+
+
+
+}
 
 
 
