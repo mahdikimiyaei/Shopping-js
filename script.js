@@ -1,432 +1,237 @@
-
 // ===============================
-// LOGIN SYSTEM
+// LOGIN SYSTEM (COOKIE)
 // ===============================
-
 
 const loginForm = document.querySelector("#loginForm");
 
+// ===============================
+// COOKIE FUNCTIONS
+// ===============================
 
-if(loginForm){
+function setCookie(name, value, days) {
+  const date = new Date();
 
+  date.setTime(date.getTime() + days * 24 * 60 * 60 * 1000);
 
-loginForm.addEventListener("submit",(e)=>{
-
-
-e.preventDefault();
-
-
-
-const username =
-document.querySelector("#username").value;
-
-
-
-const password =
-document.querySelector("#password").value;
-
-
-
-const phoneRegex = /^09\d{9}$/;
-
-
-
-if(phoneRegex.test(username) && password.length >= 4){
-
-
-
-const user = {
-
-id: username,
-
-username: username,
-
-login:true
-
-};
-
-
-
-// پاک کردن کاربر قبلی
-
-localStorage.removeItem(
-"currentUser"
-);
-
-
-
-// ذخیره کاربر جدید
-
-localStorage.setItem(
-"currentUser",
-JSON.stringify(user)
-);
-
-
-
-
-
-const userData =
-localStorage.getItem(
-`userData_${username}`
-);
-
-
-
-if(!userData){
-
-
-localStorage.setItem(
-
-`userData_${username}`,
-
-JSON.stringify({
-
-cart:[],
-
-orders:[]
-
-})
-
-);
-
-
+  document.cookie = `${name}=${encodeURIComponent(value)}; expires=${date.toUTCString()}; path=/`;
 }
 
+function getCookie(name) {
+  const cookies = document.cookie.split(";");
 
+  for (let cookie of cookies) {
+    const [key, value] = cookie.trim().split("=");
 
-window.location.replace(
-"shop.html"
-);
+    if (key === name) {
+      return decodeURIComponent(value);
+    }
+  }
 
-
-
+  return null;
 }
 
-else{
-
-
-document.querySelector("#loginError").innerText =
-"شماره موبایل یا رمز عبور اشتباه است";
-
-
-}
-
-
-
-});
-
-
+function removeCookie(name) {
+  document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/`;
 }
 
 // ===============================
-// REDIRECT IF ALREADY LOGIN
+// LOGIN
 // ===============================
 
-if(window.location.pathname.includes("index.html") || window.location.pathname === "/"){
+if (loginForm) {
+  loginForm.addEventListener("submit", (e) => {
+    e.preventDefault();
 
+    const username = document.querySelector("#username").value;
 
-const savedUser =
-localStorage.getItem("currentUser");
+    const password = document.querySelector("#password").value;
 
+    const phoneRegex = /^09\d{9}$/;
 
-if(savedUser){
+    if (phoneRegex.test(username) && password.length >= 4) {
+      const user = {
+        id: username,
 
+        username: username,
 
-const user =
-JSON.parse(savedUser);
+        login: true,
+      };
 
+      // ذخیره کاربر در Cookie
 
+      setCookie("currentUser", JSON.stringify(user), 30);
 
-if(user && user.login === true){
+      // ساخت اطلاعات کاربر
 
+      const userData = localStorage.getItem(`userData_${username}`);
 
-window.location.replace(
-"shop.html"
-);
+      if (!userData) {
+        localStorage.setItem(
+          `userData_${username}`,
 
+          JSON.stringify({
+            cart: [],
 
+            orders: [],
+          }),
+        );
+      }
+
+      window.location.href = "shop.html";
+    } else {
+      const error = document.querySelector("#loginError");
+
+      if (error) {
+        error.innerText = "شماره موبایل یا رمز عبور اشتباه است";
+      }
+    }
+  });
 }
-
-
-}
-
-
-}
-
 
 // ===============================
-// CHECK LOGIN ALL PRIVATE PAGES
+// REDIRECT LOGIN PAGE
 // ===============================
 
+const currentPath = window.location.pathname;
 
-const savedUser =
-localStorage.getItem("currentUser");
+if (currentPath.includes("index.html") || currentPath === "/") {
+  const savedUser = getCookie("currentUser");
 
+  if (savedUser) {
+    try {
+      const user = JSON.parse(savedUser);
 
-const privatePages = [
-"shop.html",
-"details.html"
-];
-
-
-
-const currentPage =
-window.location.pathname.split("/").pop();
-
-
-
-if(privatePages.includes(currentPage)){
-
-
-if(!savedUser){
-
-
-window.location.replace(
-"index.html"
-);
-
-
+      if (user.login === true) {
+        window.location.href = "shop.html";
+      }
+    } catch (error) {
+      removeCookie("currentUser");
+    }
+  }
 }
 
+// ===============================
+// PRIVATE PAGE CHECK
+// ===============================
 
+const privatePages = ["shop.html", "details.html"];
 
-const user =
-JSON.parse(savedUser);
+const currentPage = window.location.pathname.split("/").pop();
 
+if (privatePages.includes(currentPage)) {
+  const savedUser = getCookie("currentUser");
 
+  if (!savedUser) {
+    window.location.href = "index.html";
+  } else {
+    try {
+      const user = JSON.parse(savedUser);
 
-if(!user || user.login !== true){
+      if (!user.login) {
+        window.location.href = "index.html";
+      }
+    } catch (error) {
+      removeCookie("currentUser");
 
-
-window.location.replace(
-"index.html"
-);
-
-
+      window.location.href = "index.html";
+    }
+  }
 }
-
-
-}
-
-
 
 // ===============================
 // CURRENT USER
 // ===============================
 
+let currentUser = null;
 
-
-let currentUser =
-JSON.parse(
-localStorage.getItem("currentUser") || "null"
-);
-
-
-
-
-
-
-
-
-
-// ===============================
-// LOAD USER DATA
-// ===============================
-
-
-let cart=[];
-
-let orders=[];
-
-
-
-function loadUserData(){
-
-
-
-currentUser =
-JSON.parse(
-localStorage.getItem("currentUser")
-);
-
-
-
-if(!currentUser){
-
-
-cart=[];
-
-orders=[];
-
-return;
-
-
+try {
+  currentUser = JSON.parse(getCookie("currentUser") || "null");
+} catch (error) {
+  currentUser = null;
 }
 
+// ===============================
+// USER DATA
+// ===============================
 
+let cart = [];
 
-const data =
+let orders = [];
 
-JSON.parse(
+function loadUserData() {
+  if (!currentUser) {
+    cart = [];
+    orders = [];
+    return;
+  }
 
-localStorage.getItem(
+  const savedData = localStorage.getItem(`userData_${currentUser.id}`);
 
-`userData_${currentUser.id}`
+  if (savedData) {
+    const data = JSON.parse(savedData);
 
-)
+    cart = data.cart || [];
 
-);
-
-
-
-cart =
-data?.cart || [];
-
-
-
-orders =
-data?.orders || [];
-
-
-
+    orders = data.orders || [];
+  } else {
+    cart = [];
+    orders = [];
+  }
 }
-
-
-
-loadUserData();
-
-
-
-
-
-
-
-
 
 // ===============================
 // SAVE USER DATA
 // ===============================
 
+function saveUserData() {
+  if (!currentUser) return;
 
-function saveUserData(){
+  localStorage.setItem(
+    `userData_${currentUser.id}`,
 
+    JSON.stringify({
+      cart,
 
-
-if(!currentUser)
-return;
-
-
-
-localStorage.setItem(
-
-`userData_${currentUser.id}`,
-
-JSON.stringify({
-
-cart,
-
-orders
-
-})
-
-);
-
-
+      orders,
+    }),
+  );
 }
 
 // ===============================
 // LOGOUT
 // ===============================
 
+const logoutBtn = document.querySelector("#logoutBtn");
 
-const logoutBtn =
-document.querySelector("#logoutBtn");
+if (logoutBtn) {
+  logoutBtn.addEventListener("click", () => {
+    saveUserData();
 
+    removeCookie("currentUser");
 
-
-if(logoutBtn){
-
-
-logoutBtn.addEventListener("click",()=>{
-
-
-
-saveUserData();
-
-
-
-localStorage.removeItem(
-"currentUser"
-);
-
-
-
-window.location.replace(
-"index.html"
-);
-
-
-
-});
-
-
+    window.location.href = "index.html";
+  });
 }
-
-
-
-
-
-
-
-
 
 // ===============================
 // CART
 // ===============================
 
+const cartItems = document.querySelector("#cartItems");
 
+const totalPrice = document.querySelector("#totalPrice");
 
-const cartItems =
-document.querySelector("#cartItems");
+function renderCart() {
+  if (!cartItems) return;
 
+  cartItems.innerHTML = "";
 
+  let total = 0;
 
-const totalPrice =
-document.querySelector("#totalPrice");
+  cart.forEach((item, index) => {
+    total += item.price;
 
-
-
-
-
-
-
-function renderCart(){
-
-
-
-if(!cartItems)
-return;
-
-
-
-cartItems.innerHTML="";
-
-
-
-let total=0;
-
-
-
-cart.forEach((item,index)=>{
-
-
-
-total += item.price;
-
-
-
-cartItems.innerHTML += `
+    cartItems.innerHTML += `
 
 
 <div class="cart-item">
@@ -460,221 +265,93 @@ ${item.price.toLocaleString()}
 
 
 `;
+  });
 
-
-
-});
-
-
-
-if(totalPrice){
-
-totalPrice.innerText =
-total.toLocaleString();
-
+  if (totalPrice) {
+    totalPrice.innerText = total.toLocaleString();
+  }
 }
 
+function removeCart(index) {
+  cart.splice(index, 1);
 
+  saveUserData();
 
+  renderCart();
 }
 
-
-
-
-
-
-
-function removeCart(index){
-
-
-
-cart.splice(index,1);
-
-
-
-saveUserData();
-
-
-
-renderCart();
-
-
-
-}
-
-
-
-window.removeCart =
-removeCart;
-
-
-
-
-
-
-
-
+window.removeCart = removeCart;
 
 // ===============================
 // ADD PRODUCT
 // ===============================
 
+const addButtons = document.querySelectorAll(".add-cart");
 
+addButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    const product = {
+      id: Date.now(),
 
-const addButtons =
-document.querySelectorAll(".add-cart");
+      name: button.dataset.name,
 
+      price: Number(button.dataset.price),
+    };
 
+    cart.push(product);
 
-addButtons.forEach(button=>{
+    saveUserData();
 
+    renderCart();
 
-button.addEventListener("click",()=>{
-
-
-
-const product = {
-
-
-id:Date.now(),
-
-
-
-name:
-button.dataset.name,
-
-
-
-price:
-Number(
-button.dataset.price
-)
-
-
-
-};
-
-
-
-
-cart.push(product);
-
-
-
-saveUserData();
-
-
-
-renderCart();
-
-
-
-showMessage(
-"محصول به سبد خرید اضافه شد"
-);
-
-
-
+    showMessage("محصول به سبد خرید اضافه شد");
+  });
 });
-
-
-});
-
-
-
-
-
-
-
-
-
-
-
 
 // ===============================
 // MESSAGE
 // ===============================
 
+function showMessage(text) {
+  const toast = document.createElement("div");
 
+  toast.innerText = text;
 
-function showMessage(text){
+  toast.style.position = "fixed";
 
+  toast.style.bottom = "30px";
 
+  toast.style.left = "50%";
 
-const toast =
-document.createElement("div");
+  toast.style.transform = "translateX(-50%)";
 
+  toast.style.background = "#22c55e";
 
+  toast.style.color = "white";
 
-toast.innerText=text;
+  toast.style.padding = "15px 25px";
 
+  toast.style.borderRadius = "15px";
 
+  toast.style.zIndex = "999";
 
-toast.style.position="fixed";
+  document.body.appendChild(toast);
 
-toast.style.bottom="30px";
-
-toast.style.left="50%";
-
-toast.style.transform=
-"translateX(-50%)";
-
-toast.style.background="#22c55e";
-
-toast.style.color="white";
-
-toast.style.padding="15px 25px";
-
-toast.style.borderRadius="15px";
-
-toast.style.zIndex="999";
-
-
-
-document.body.appendChild(toast);
-
-
-
-setTimeout(()=>{
-
-
-toast.remove();
-
-
-},2000);
-
-
-
+  setTimeout(() => {
+    toast.remove();
+  }, 2000);
 }
-
-
-
-
-
-
-
-
 
 // ===============================
 // DELIVERY OPTIONS
 // ===============================
 
+const deliveryTime = document.querySelector("#deliveryTime");
 
-const deliveryTime =
-document.querySelector("#deliveryTime");
+function createDeliveryOptions() {
+  if (!deliveryTime) return;
 
-
-
-function createDeliveryOptions(){
-
-
-
-if(!deliveryTime)
-return;
-
-
-
-deliveryTime.innerHTML = `
+  deliveryTime.innerHTML = `
 
 <option value="">
 
@@ -684,293 +361,121 @@ deliveryTime.innerHTML = `
 
 `;
 
+  const now = new Date();
 
+  const timeSlots = [
+    "10:00 تا 12:00",
 
-const now =
-new Date();
+    "12:00 تا 14:00",
 
+    "14:00 تا 16:00",
 
+    "16:00 تا 18:00",
 
-const timeSlots = [
+    "18:00 تا 20:00",
 
+    "20:00 تا 22:00",
+  ];
 
-"10:00 تا 12:00",
+  for (let day = 3; day <= 7; day++) {
+    const date = new Date();
 
-"12:00 تا 14:00",
+    date.setDate(now.getDate() + day);
 
-"14:00 تا 16:00",
+    const dateText = date.toLocaleDateString("fa-IR");
 
-"16:00 تا 18:00",
+    timeSlots.forEach((time) => {
+      const option = document.createElement("option");
 
-"18:00 تا 20:00",
+      option.value = `${dateText} - ${time}`;
 
-"20:00 تا 22:00"
+      option.innerText = `${dateText} - ${time}`;
 
-
-];
-
-
-
-for(let day = 3; day <= 7; day++){
-
-
-
-const date =
-new Date();
-
-
-
-date.setDate(
-now.getDate() + day
-);
-
-
-
-
-const dateText =
-date.toLocaleDateString("fa-IR");
-
-
-
-
-timeSlots.forEach(time=>{
-
-
-
-const option =
-document.createElement("option");
-
-
-
-option.value =
-`${dateText} - ${time}`;
-
-
-
-option.innerText =
-`${dateText} - ${time}`;
-
-
-
-deliveryTime.appendChild(option);
-
-
-
-});
-
-
+      deliveryTime.appendChild(option);
+    });
+  }
 }
-
-
-}
-
-
 
 createDeliveryOptions();
 // ===============================
 // CHECKOUT
 // ===============================
 
+const checkoutForm = document.querySelector("#checkoutForm");
 
-const checkoutForm =
-document.querySelector("#checkoutForm");
+if (checkoutForm) {
+  checkoutForm.addEventListener("submit", (e) => {
+    e.preventDefault();
 
+    if (cart.length === 0) {
+      alert("سبد خرید خالی است");
 
+      return;
+    }
 
-if(checkoutForm){
+    const order = {
+      id: Date.now(),
 
+      userId: currentUser.id,
 
-checkoutForm.addEventListener("submit",(e)=>{
+      name: document.querySelector("#fullname").value,
 
+      email: document.querySelector("#email").value,
 
-e.preventDefault();
+      address: document.querySelector("#address").value,
 
+      postal: document.querySelector("#postal").value,
 
+      products: [...cart],
 
+      total: cart.reduce(
+        (sum, item) => sum + item.price,
 
-if(cart.length===0){
+        0,
+      ),
 
+      date: new Date().toLocaleString("fa-IR"),
 
-alert(
-"سبد خرید خالی است"
-);
+      deliveryTime: document.querySelector("#deliveryTime").value,
+    };
 
+    orders.push(order);
 
-return;
+    // خالی کردن سبد
 
+    cart = [];
 
+    saveUserData();
+
+    renderCart();
+
+    showOrders();
+
+    checkoutForm.reset();
+
+    showMessage("سفارش ثبت شد");
+  });
 }
-
-
-
-
-
-
-
-const order={
-
-
-
-id:Date.now(),
-
-
-
-userId:
-currentUser.id,
-
-
-
-name:
-document.querySelector("#fullname").value,
-
-
-
-email:
-document.querySelector("#email").value,
-
-
-
-address:
-document.querySelector("#address").value,
-
-
-
-postal:
-document.querySelector("#postal").value,
-
-
-
-products:
-[...cart],
-
-
-
-
-total:
-
-cart.reduce(
-
-(sum,item)=>
-
-sum + item.price,
-
-0
-
-),
-
-
-
-date:
-
-new Date()
-.toLocaleString("fa-IR"),
-
-
-
-deliveryTime:
-
-document.querySelector("#deliveryTime").value
-
-
-
-};
-
-
-
-
-
-
-
-orders.push(order);
-
-
-
-// خالی کردن سبد
-
-cart=[];
-
-
-
-saveUserData();
-
-
-
-renderCart();
-
-
-
-showOrders();
-
-
-
-checkoutForm.reset();
-
-
-
-showMessage(
-"سفارش ثبت شد"
-);
-
-
-
-});
-
-
-}
-
-
-
-
-
-
-
-
 
 // ===============================
 // SHOW ORDERS
 // ===============================
 
+function showOrders() {
+  const result = document.querySelector("#orderResult");
 
-function showOrders(){
+  if (!result) return;
 
+  result.innerHTML = "";
 
+  if (orders.length === 0) {
+    result.innerHTML = "هنوز سفارشی ثبت نشده است";
 
-const result =
-document.querySelector("#orderResult");
+    return;
+  }
 
-
-
-if(!result)
-return;
-
-
-
-result.innerHTML="";
-
-
-
-if(orders.length===0){
-
-
-
-result.innerHTML =
-"هنوز سفارشی ثبت نشده است";
-
-return;
-
-
-}
-
-
-
-
-
-
-
-orders.forEach(order=>{
-
-
-result.innerHTML += `
+  orders.forEach((order) => {
+    result.innerHTML += `
 
 
 <div class="order-card">
@@ -1023,9 +528,9 @@ ${order.postal}
 
 
 
-${
-
-order.products.map(item=>`
+${order.products
+  .map(
+    (item) => `
 
 
 ${item.name}
@@ -1039,9 +544,9 @@ ${item.price.toLocaleString()}
 <br>
 
 
-`).join("")
-
-}
+`,
+  )
+  .join("")}
 
 
 
@@ -1083,6 +588,22 @@ ${order.date}
 ${order.deliveryTime}
 
 
+<br><br>
+
+
+<button 
+class="cancel-order-btn"
+onclick="removeOrder(${order.id})">
+
+<i class="fa-solid fa-trash"></i>
+
+لغو سفارش
+
+</button>
+
+❌ لغو سفارش
+
+</button>
 
 
 
@@ -1093,281 +614,136 @@ ${order.deliveryTime}
 
 
 `;
-
-
-
-});
-
-
+  });
 }
 
+function removeOrder(orderId) {
+  const confirmDelete = confirm("آیا از لغو این سفارش مطمئن هستید؟");
 
-// ===============================
-// PRODUCT DETAILS
-// ===============================
+  if (!confirmDelete) return;
 
+  orders = orders.filter((order) => order.id !== orderId);
 
-const detailsButtons = document.querySelectorAll(".details-btn");
+  saveUserData();
 
+  showOrders();
 
-detailsButtons.forEach(button => {
-
-
-button.addEventListener("click",()=>{
-
-
-const product = {
-
-
-name: button.dataset.name,
-
-
-price: Number(button.dataset.price),
-
-
-image: button.dataset.image,
-
-
-description: button.dataset.description,
-
-
-specs: JSON.parse(button.dataset.specs)
-
-
-
-};
-
-
-
-localStorage.setItem(
-
-"selectedProduct",
-
-JSON.stringify(product)
-
-);
-
-
-
-window.location.href="details.html";
-
-
-});
-
-
-});
-
-
-// ===============================
-// SHOW DETAILS PAGE
-// ===============================
-
-
-const selectedProduct = JSON.parse(
-
-localStorage.getItem("selectedProduct")
-
-);
-
-
-
-const detailsImage =
-document.querySelector("#detailsImage");
-
-
-const detailsName =
-document.querySelector("#detailsName");
-
-
-const detailsPrice =
-document.querySelector("#detailsPrice");
-
-
-const detailsDescription =
-document.querySelector("#detailsDescription");
-
-
-const detailsSpecs =
-document.querySelector("#detailsSpecs");
-
-
-
-
-
-if(selectedProduct && detailsImage){
-
-
-
-detailsImage.src =
-selectedProduct.image;
-
-
-
-detailsName.innerText =
-selectedProduct.name;
-
-
-
-detailsPrice.innerText =
-selectedProduct.price.toLocaleString()
-+
-" تومان";
-
-
-
-detailsDescription.innerText =
-selectedProduct.description;
-
-
-
-
-
-if(detailsSpecs && selectedProduct.specs){
-
-
-
-detailsSpecs.innerHTML = "";
-
-
-
-Object.entries(selectedProduct.specs).forEach(([key,value])=>{
-
-
-
-detailsSpecs.innerHTML += `
-
-
-<tr>
-
-<td>
-${key}
-</td>
-
-
-<td>
-${value}
-</td>
-
-
-</tr>
-
-
-`;
-
-
-
-});
-
-
-
+  showMessage("سفارش لغو شد");
 }
 
-
-
-}
+window.removeOrder = removeOrder;
 
 // ===============================
 // BACK TO SHOP
 // ===============================
 
+const backShop = document.querySelector("#backShop");
 
-const backShop =
-document.querySelector("#backShop");
-
-
-if(backShop){
-
-
-backShop.addEventListener("click",()=>{
-
-
-window.location.href="shop.html";
-
-
-});
-
-
+if (backShop) {
+  backShop.addEventListener("click", () => {
+    window.location.href = "shop.html";
+  });
 }
-
-
 
 // ===============================
 // DETAILS ADD CART
 // ===============================
 
+const detailsButtons = document.querySelectorAll(".details-btn");
 
-const detailsAddCart =
+detailsButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    const product = {
+      name: button.dataset.name,
 
-document.querySelector("#detailsAddCart");
+      price: Number(button.dataset.price),
 
+      image: button.dataset.image,
 
+      description: button.dataset.description,
 
-if(detailsAddCart){
+      specs: JSON.parse(button.dataset.specs),
+    };
 
+    localStorage.setItem("selectedProduct", JSON.stringify(product));
 
-
-detailsAddCart.addEventListener("click",()=>{
-
-
-
-if(!selectedProduct)
-return;
-
-
-
-const product = {
-
-
-id:Date.now(),
-
-
-name:selectedProduct.name,
-
-
-price:selectedProduct.price
-
-
-
-};
-
-
-
-cart.push(product);
-
-
-
-saveUserData();
-
-
-
-renderCart();
-
-
-
-showMessage(
-
-"محصول به سبد خرید اضافه شد"
-
-);
-
-
-
+    window.location.href = "details.html";
+  });
 });
 
+const selectedProduct = JSON.parse(localStorage.getItem("selectedProduct"));
 
+const detailsImage = document.querySelector("#detailsImage");
+const detailsName = document.querySelector("#detailsName");
+const detailsPrice = document.querySelector("#detailsPrice");
+const detailsDescription = document.querySelector("#detailsDescription");
+const detailsSpecs = document.querySelector("#detailsSpecs");
 
+if (selectedProduct && detailsImage) {
+  detailsImage.src = selectedProduct.image;
+
+  detailsName.innerText = selectedProduct.name;
+
+  detailsPrice.innerText = selectedProduct.price.toLocaleString() + " تومان";
+
+  detailsDescription.innerText = selectedProduct.description;
+
+  if (detailsSpecs && selectedProduct.specs) {
+    detailsSpecs.innerHTML = "";
+
+    Object.entries(selectedProduct.specs).forEach(([key, value]) => {
+      detailsSpecs.innerHTML += `
+
+<tr>
+
+<td>${key}</td>
+
+<td>${value}</td>
+
+</tr>
+
+`;
+    });
+  }
 }
 
+// ===============================
+// DETAILS PAGE BUTTONS
+// ===============================
 
+const detailsAddCart = document.querySelector("#detailsAddCart");
 
+if (detailsAddCart) {
+  detailsAddCart.addEventListener("click", () => {
+    if (!selectedProduct) return;
+
+    if (!currentUser) {
+      window.location.href = "index.html";
+      return;
+    }
+
+    cart.push({
+      id: Date.now(),
+      name: selectedProduct.name,
+      price: selectedProduct.price,
+    });
+
+    saveUserData();
+
+    showMessage("محصول به سبد خرید اضافه شد");
+
+    setTimeout(() => {
+      window.location.href = "shop.html#cartSection";
+    }, 300);
+  });
+}
 
 // ===============================
 // START
 // ===============================
 
-
+loadUserData();
 
 renderCart();
-
 
 showOrders();

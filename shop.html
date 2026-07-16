@@ -1089,7 +1089,7 @@ data-price="45000000">
 
 
 
-<section class="cart-section">
+<section class="cart-section" id="cartSection">
 
 <h2>
 سبد خرید
@@ -1238,7 +1238,30 @@ required>
 
 <script src="script.js"></script>
 
+<script>
+window.addEventListener("load", () => {
 
+  if (window.location.hash === "#cartSection") {
+
+    setTimeout(() => {
+
+      const cartSection = document.getElementById("cartSection");
+
+      if(cartSection){
+
+        cartSection.scrollIntoView({
+          behavior: "smooth",
+          block: "start"
+        });
+
+      }
+
+    }, 1000);
+
+  }
+
+});
+</script>
 </body>
 
 
