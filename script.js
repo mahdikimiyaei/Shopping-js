@@ -43,48 +43,87 @@ if (loginForm) {
     e.preventDefault();
 
     const username = document.querySelector("#username").value;
-
     const password = document.querySelector("#password").value;
 
+    const usernameRegex = /^[a-zA-Z\u0600-\u06FF0-9_]{3,30}$/;
     const phoneRegex = /^09\d{9}$/;
 
-    if (phoneRegex.test(username) && password.length >= 4) {
-      const user = {
-        id: username,
 
-        username: username,
+    if (!(phoneRegex.test(username) || usernameRegex.test(username))) {
+      document.querySelector("#loginError").innerText =
+        "نام کاربری یا شماره موبایل معتبر نیست";
 
-        login: true,
-      };
-
-      // ذخیره کاربر در Cookie
-
-      setCookie("currentUser", JSON.stringify(user), 30);
-
-      // ساخت اطلاعات کاربر
-
-      const userData = localStorage.getItem(`userData_${username}`);
-
-      if (!userData) {
-        localStorage.setItem(
-          `userData_${username}`,
-
-          JSON.stringify({
-            cart: [],
-
-            orders: [],
-          }),
-        );
-      }
-
-      window.location.href = "shop.html";
-    } else {
-      const error = document.querySelector("#loginError");
-
-      if (error) {
-        error.innerText = "شماره موبایل یا رمز عبور اشتباه است";
-      }
+      return;
     }
+
+
+    if (password.length < 4) {
+      document.querySelector("#loginError").innerText =
+        "رمز عبور نمی‌تواند کمتر از ۴ کاراکتر باشد";
+
+      return;
+    }
+
+
+    const savedAccount = localStorage.getItem(`account_${username}`);
+
+
+    if (savedAccount) {
+
+      const account = JSON.parse(savedAccount);
+
+
+      if (account.password !== password) {
+
+        document.querySelector("#loginError").innerText =
+          "رمز عبور اشتباه است";
+
+        return;
+      }
+
+
+    } else {
+
+      localStorage.setItem(
+        `account_${username}`,
+        JSON.stringify({
+          phone: username,
+          password: password,
+        })
+      );
+
+    }
+
+
+    const user = {
+      id: username,
+      username: username,
+      login: true,
+    };
+
+
+    setCookie(
+      "currentUser",
+      JSON.stringify(user),
+      30
+    );
+
+
+    if (!localStorage.getItem(`userData_${username}`)) {
+
+      localStorage.setItem(
+        `userData_${username}`,
+        JSON.stringify({
+          cart: [],
+          orders: [],
+        })
+      );
+
+    }
+
+
+    window.location.href = "shop.html";
+
   });
 }
 
@@ -407,43 +446,126 @@ if (checkoutForm) {
   checkoutForm.addEventListener("submit", (e) => {
     e.preventDefault();
 
-    if (cart.length === 0) {
-      alert("سبد خرید خالی است");
+
+    const fullname = document.querySelector("#fullname").value.trim();
+    const email = document.querySelector("#email").value.trim();
+    const address = document.querySelector("#address").value.trim();
+    const postal = document.querySelector("#postal").value.trim();
+    const delivery = document.querySelector("#deliveryTime").value;
+
+
+    // Regex ها
+
+    const nameRegex = /^[a-zA-Z\u0600-\u06FF\s]{3,40}$/;
+
+    const emailRegex =
+      /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    const postalRegex =
+      /^\d{10}$/;
+
+
+
+    // نام و نام خانوادگی
+
+    if (!nameRegex.test(fullname)) {
+
+      showMessage("نام و نام خانوادگی معتبر نیست");
 
       return;
     }
 
+
+
+    // ایمیل
+
+    if (!emailRegex.test(email)) {
+
+      showMessage("ایمیل معتبر نیست");
+
+      return;
+    }
+
+
+
+    // آدرس
+
+    if (address.length < 10) {
+
+      showMessage("آدرس باید حداقل ۱۰ کاراکتر باشد");
+
+      return;
+    }
+
+
+
+    // کد پستی
+
+    if (!postalRegex.test(postal)) {
+
+      showMessage("کد پستی باید دقیقا ۱۰ رقم باشد");
+
+      return;
+    }
+
+
+
+    // زمان ارسال
+
+    if (!delivery) {
+
+      showMessage("زمان ارسال را انتخاب کنید");
+
+      return;
+    }
+
+
+
+    // سبد خرید
+
+    if (cart.length === 0) {
+
+      showMessage("سبد خرید خالی است");
+
+      return;
+    }
+
+
+
     const order = {
+
       id: Date.now(),
 
       userId: currentUser.id,
 
-      name: document.querySelector("#fullname").value,
+      name: fullname,
 
-      email: document.querySelector("#email").value,
+      email: email,
 
-      address: document.querySelector("#address").value,
+      address: address,
 
-      postal: document.querySelector("#postal").value,
+      postal: postal,
 
       products: [...cart],
 
       total: cart.reduce(
         (sum, item) => sum + item.price,
-
-        0,
+        0
       ),
 
       date: new Date().toLocaleString("fa-IR"),
 
-      deliveryTime: document.querySelector("#deliveryTime").value,
+      deliveryTime: delivery,
+
     };
+
+
 
     orders.push(order);
 
-    // خالی کردن سبد
 
     cart = [];
+
 
     saveUserData();
 
@@ -451,9 +573,12 @@ if (checkoutForm) {
 
     showOrders();
 
+
     checkoutForm.reset();
 
-    showMessage("سفارش ثبت شد");
+
+    showMessage("سفارش با موفقیت ثبت شد");
+
   });
 }
 
